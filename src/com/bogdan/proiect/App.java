@@ -1,14 +1,17 @@
 package com.bogdan.proiect;
 
+
 import java.util.*;
 
 public class App {
-    List<Ticket> tickets = new ArrayList<Ticket>();
-    HashMap <Program,Film> program = new HashMap<Program,Film>();
-    List<Film> films = new ArrayList<Film>();
+    ArrayList<Ticket> tickets = new ArrayList<Ticket>();
+    HashMap<Program,Film> program = new HashMap<Program,Film>();
+    ArrayList<Film> films = new ArrayList<Film>();
 
     public App() {
         System.out.println("Aplicatia s-a pornit");
+        Database.getDatabase().loadData(films,"films.csv");
+        Audit.write("Opened App");
     }
 
     public void start(){
@@ -57,7 +60,10 @@ public class App {
                 ok = false;
             }
         }while (ok);
+        System.out.println("Salvare...");
+        saveData();
         System.out.println("La revedere!");
+        Audit.write("Exit App");
     }
 
     public void addProgram() {
@@ -70,6 +76,7 @@ public class App {
             film = getFilmById(id);
         }while (film == null);
         program.put(new Program(),film);
+        Audit.write("Add Program");
     }
 
     public void displayProgram(){
@@ -83,6 +90,7 @@ public class App {
                 System.out.println(stringBuilder.toString());
             }
         }
+        Audit.write("Display Program");
     }
 
     public void sellTicket(){
@@ -104,32 +112,27 @@ public class App {
         int seat = scanner.nextInt();
         scanner.nextLine();
         tickets.add(new Ticket(program.get(p),p.getTheatre(),row,seat,p.getDate()));
-    }
-
-    public void displayTickets(){
-        for(Ticket ticket:tickets){
-            System.out.println(ticket);
-        }
-    }
-
-    public void displayFilmsByGenre(String genre){
-        for(Film film:films){
-            if(film.getGenre().equalsIgnoreCase(genre)){
-                System.out.println(film);
-            }
-        }
+        Audit.write("Sold Ticket");
     }
 
     public Film getFilmById(int id){
         Film rfilm = null;
         for(Film film:films){
-            if(film.getId() == id) {
+            if(film.id() == id) {
                 rfilm = film;
                 break;
             }
         }
         return rfilm;
     }
+
+    public void displayTickets(){
+        for(Ticket ticket:tickets){
+            System.out.println(ticket);
+        }
+        Audit.write("Display Tickets");
+    }
+
 
     public void addFilm() throws IllegalStateException{
         Film film;
@@ -163,25 +166,26 @@ public class App {
         String sub_genre = scanner.nextLine();
         switch (genre){
             case "action":
-                film = new FilmAction(name,year,director,rating,sub_genre);
+                film = new FilmAction(director,name,rating,sub_genre,year);
                 break;
             case "sf":
                 System.out.println("landscape:");
                 String landscape = scanner.next();
-                film = new FilmSF(name,year,director,rating,sub_genre,landscape);
+                film = new FilmSF(director,landscape,name,rating,sub_genre,year);
                 break;
             case "historical":
                 System.out.println("Perioada:");
                 String period = scanner.next();
-                film = new FilmHistorical(name,year,director,rating,sub_genre,period);
+                film = new FilmHistorical(director,period,name,rating,sub_genre,year);
                 break;
             case "comedy":
-                film = new FilmComedy(name,year,director,rating,sub_genre);
+                film = new FilmComedy(director,name,rating,sub_genre,year);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + genre);
         }
         films.add(film);
+        Audit.write("Added Film");
     }
 
     public void displayFilms(){
@@ -189,5 +193,10 @@ public class App {
             System.out.println(film);
             System.out.println("");
         }
+        Audit.write("Display Films");
+    }
+
+    public void saveData(){
+        Database.getDatabase().saveData(films,"films.csv");
     }
 }

@@ -45,12 +45,28 @@ public class Film {
         return stringBuilder.toString();
     }
 
-    public int getId() {
+    public int id(){
         return id;
     }
 
-    public String getGenre() {
-        return genre;
+    public static void setTotalNumberFilms(int totalNumberFilms) {
+        Film.totalNumberFilms = totalNumberFilms;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public String getDirector() {
+        return director;
+    }
+
+    public Rating getRating() {
+        return rating;
     }
 
     public void setYear(int year) {
