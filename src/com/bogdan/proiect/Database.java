@@ -5,7 +5,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Database<T> {
+public class Database {
     private static Database instance = null;
     private Database(){}
 
@@ -16,7 +16,7 @@ public class Database<T> {
         return instance;
     }
 
-    public void saveData(ArrayList<T> list,String fileName){
+    public <T> void saveData(ArrayList<T> list, String fileName){
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
             for (T element:list) {
@@ -41,7 +41,7 @@ public class Database<T> {
         }
     }
 
-    public void loadData(ArrayList<T> list, String fileName){
+    public <T> void loadData(ArrayList<T> list, String fileName){
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
             String line = reader.readLine();
