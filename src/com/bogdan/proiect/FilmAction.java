@@ -1,10 +1,13 @@
 package com.bogdan.proiect;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 public class FilmAction extends Film{
 
     private final String sub_genre;
 
-    public FilmAction(String director, String name, Rating rating, String sub_genre , Integer year) {
+    public FilmAction(String name, int year, String director, Rating rating, String sub_genre) {
         super(name, year, director, rating,"Action");
         this.sub_genre = sub_genre; //Spy,superhero,disaster,martial arts, etc...
     }
@@ -17,7 +20,10 @@ public class FilmAction extends Film{
         return stringBuilder.toString();
     }
 
-    public String getSub_genre() {
-        return sub_genre;
+    @Override
+    public PreparedStatement getSqlStatement() throws SQLException {
+        PreparedStatement stm = super.getSqlStatement();
+        stm.setString(7,sub_genre);
+        return stm;
     }
 }

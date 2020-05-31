@@ -1,10 +1,13 @@
 package com.bogdan.proiect;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 public class FilmHistorical extends Film{
     private final String sub_genre;
     private String period;
 
-    public FilmHistorical(String director, String name, String period, Rating rating, String sub_genre, Integer year) {
+    public FilmHistorical(String name, int year, String director, Rating rating, String sub_genre, String period) {
         super(name, year, director, rating, "Historical");
         this.sub_genre = sub_genre; // war, biographic, alternate-history
         this.period = period; // medieval, WW1, WW2
@@ -20,11 +23,11 @@ public class FilmHistorical extends Film{
         return stringBuilder.toString();
     }
 
-    public String getPeriod() {
-        return period;
-    }
-
-    public String getSub_genre() {
-        return sub_genre;
+    @Override
+    public PreparedStatement getSqlStatement() throws SQLException {
+        PreparedStatement stm = super.getSqlStatement();
+        stm.setString(7,sub_genre);
+        stm.setString(8,period);
+        return stm;
     }
 }

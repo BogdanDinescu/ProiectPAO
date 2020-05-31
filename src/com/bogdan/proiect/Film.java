@@ -1,5 +1,9 @@
 package com.bogdan.proiect;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+
 enum Rating{
     AG, // Acord General
     AP12, // Acord Parental. Permis peste 12 ani
@@ -53,24 +57,17 @@ public class Film {
         Film.totalNumberFilms = totalNumberFilms;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public String getDirector() {
-        return director;
-    }
-
-    public Rating getRating() {
-        return rating;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
+    public PreparedStatement getSqlStatement() throws SQLException {
+        PreparedStatement stm = Database.getConnection().prepareStatement("INSERT INTO FILMS (film_id,name,year,director,rating,genre,sub_genre,extra_info) VALUES(?,?,?,?,?,?,?,?)");
+        stm.setInt(1,id);
+        stm.setString(2,name);
+        stm.setInt(3,year);
+        stm.setString(4,director);
+        stm.setString(5,rating.toString());
+        stm.setString(6,genre);
+        stm.setNull(7, Types.NULL);
+        stm.setNull(8, Types.NULL);
+        return stm;
     }
 
     public boolean isPermitedAtAge(int age){

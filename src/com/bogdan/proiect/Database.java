@@ -1,81 +1,136 @@
 package com.bogdan.proiect;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.sql.*;
 
 public class Database {
     private static Database instance = null;
+    private Connection connection;
     private Database(){}
 
     public static Database getDatabase(){
-        if (instance == null){
-            instance = new Database();
+        if (instance == null) {
+            synchronized (Database.class) {
+                if (instance == null) {
+                    instance = new Database();
+                    try {
+                        String dbURL = "jdbc:oracle:thin:@193.226.51.37:1521:o11g";
+                        String username = "grupa41";
+                        String password = "bazededate";
+                        instance.connection = DriverManager.getConnection(dbURL, username, password);
+                        Statement stm = instance.connection.createStatement();
+
+                        ResultSet rs = stm.executeQuery("SELECT COUNT(*) NR FROM FILMS");
+                        rs.next();
+                        Film.setTotalNumberFilms(rs.getInt("NR"));
+
+                        rs = stm.executeQuery("SELECT COUNT(*) NR FROM PROGRAM");
+                        rs.next();
+                        Program.setTotalNumberPrograms(rs.getInt("NR"));
+
+                        rs = stm.executeQuery("SELECT COUNT(*) NR FROM TICKETS");
+                        rs.next();
+                        Ticket.setTotalNumberTickets(rs.getInt("NR"));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
         return instance;
     }
 
-    public <T> void saveData(ArrayList<T> list, String fileName){
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-            for (T element:list) {
-                List<Method> getters = Arrays.stream(element.getClass().getMethods()).filter(method -> method.getName().startsWith("get")).collect(Collectors.toList());
-                getters.sort(Comparator.comparing(Method::getName));
 
-                String field = getters.get(0).invoke(element,null).toString();
-                field = field.replaceFirst("class ","");
-                writer.write(field);
-                for (int i = 1; i < getters.size(); i++) {
-                    writer.write(',');
-                    field = (getters.get(i).invoke(element,null)).toString();
-                    writer.write(field);
-                }
-                writer.write(System.lineSeparator());
-            }
-            writer.close();
-        }catch (IOException e){
-            System.out.println("Eroare la scriere");
-        } catch (IllegalAccessException | InvocationTargetException e) {
+    public static void exit() {
+        try {
+            getConnection().close();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public <T> void loadData(ArrayList<T> list, String fileName){
+
+    public static Connection getConnection() {
+        return getDatabase().connection;
+    }
+
+    public <T extends Film> void saveFilm(T film) throws SQLException{
+        PreparedStatement stm = film.getSqlStatement();
+        stm.execute();
+    }
+
+    public <T extends Film> ResultSet loadFilms() {
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(fileName));
-            String line = reader.readLine();
-            while (line != null){
-                String[] fields = line.split(",");
-                Class<?> c = Class.forName(fields[0]);
-                fields = Arrays.copyOfRange(fields, 1, fields.length);
-                Constructor<?>[] constructor = c.getDeclaredConstructors();
-                Class<?>[] types = (constructor[0]).getParameterTypes();
-                Object[] arg = new Object[types.length];
-                for (int i = 0; i < types.length; i++) {
-                    switch (types[i].getSimpleName()){
-                        case "String":
-                            arg[i] = fields[i];
-                            break;
-                        case "Integer":
-                            arg[i] = Integer.valueOf(fields[i]);
-                            break;
-                        case "Rating":
-                            arg[i] = Rating.valueOf(fields[i]);
-                            break;
-                    }
-                }
-                list.add((T) constructor[0].newInstance(arg));
-                line = reader.readLine();
-            }
-            reader.close();
-        }catch (IOException e){
-            System.out.println("Eroare la citire");
-        }catch (ClassNotFoundException e){
-            System.out.println("Clasa nu exista");
-        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            Statement stm = this.connection.createStatement();
+            return stm.executeQuery("SELECT * FROM FILMS");
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        Film.setTotalNumberFilms(list.size());
+        return null;
     }
+
+    public String getFilmNameById(int id) {
+        try {
+            PreparedStatement stm = this.connection.prepareStatement("SELECT NAME FROM FILMS WHERE FILM_ID = ?");
+            stm.setInt(1, id);
+            ResultSet rs = stm.executeQuery();
+            if(rs.next())
+                return rs.getString("NAME");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public ResultSet loadProgram() {
+        try {
+            Statement stm = this.connection.createStatement();
+            return stm.executeQuery("SELECT PROGRAM_ID, START_DATE, NAME, ROUND(START_DATE-SYSDATE) DAY FROM PROGRAM JOIN FILMS USING(FILM_ID) WHERE START_DATE BETWEEN SYSDATE AND SYSDATE+7 ORDER BY START_DATE");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void saveProgram(Program p) throws SQLException {
+        PreparedStatement stm = this.connection.prepareStatement("INSERT INTO PROGRAM(program_id,start_date,theatre_id,film_id) VALUES (?,?,?,?)");
+        stm.setInt(1,p.getProgram_id());
+        stm.setDate(2,p.getDate());
+        stm.setInt(3,p.getTheatre());
+        stm.setInt(4,p.getFilm_id());
+        stm.execute();
+    }
+
+    public Program getProgramById(int id) {
+        try {
+            PreparedStatement stm = this.connection.prepareStatement("SELECT * FROM PROGRAM WHERE PROGRAM_ID = ?");
+            stm.setInt(1, id);
+            ResultSet rs = stm.executeQuery();
+            if(rs.next())
+                return new Program(rs.getInt("PROGRAM_ID"),rs.getDate("START_DATE"),rs.getInt("THEATRE_ID"),rs.getInt("FILM_ID"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void sellTicket(Ticket t) throws SQLException {
+        PreparedStatement stm = this.connection.prepareStatement("INSERT INTO TICKETS(ticket_id,program_id,row_num,seat_num) VALUES(?,?,?,?)");
+        stm.setInt(1,t.getTicket_id());
+        stm.setInt(2,t.getProgram_id());
+        stm.setInt(3,t.getRow());
+        stm.setInt(4,t.getSeat());
+        stm.execute();
+    }
+
+    public ResultSet loadTickets() {
+        try {
+            Statement stm = this.connection.createStatement();
+            return stm.executeQuery("SELECT * FROM TICKETS");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

@@ -1,10 +1,13 @@
 package com.bogdan.proiect;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 public class FilmSF extends Film {
     private final String sub_genre;
     private final String landscape;
 
-    public FilmSF(String director, String landscape, String name, Rating rating, String sub_genre , Integer year) {
+    public FilmSF(String name, int year, String director, Rating rating, String sub_genre, String landscape) {
         super(name, year, director, rating, "Science Fiction");
         this.sub_genre = sub_genre; // dystopian, utopian
         this.landscape = landscape; // cyberpunk, steampunk, atomicpunk
@@ -20,11 +23,12 @@ public class FilmSF extends Film {
         return stringBuilder.toString();
     }
 
-    public String getLandscape() {
-        return landscape;
+    @Override
+    public PreparedStatement getSqlStatement() throws SQLException {
+        PreparedStatement stm = super.getSqlStatement();
+        stm.setString(7,sub_genre);
+        stm.setString(8,landscape);
+        return stm;
     }
 
-    public String getSub_genre() {
-        return sub_genre;
-    }
 }

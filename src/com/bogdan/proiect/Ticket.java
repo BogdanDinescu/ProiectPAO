@@ -1,20 +1,16 @@
 package com.bogdan.proiect;
 
-import java.util.Date;
-
 public class Ticket {
-    private static Integer totalNumberTickets = 0;
-    private Integer number;
-    private Film film;
-    private int theatre;
+    private static int totalNumberTickets = 0;
+    private int ticket_id;
+    private int program_id;
     private Seat seat;
-    private Date date;
 
     private class Seat{
         int rowNumber;
         int seatNumber;
 
-        public Seat(Integer rowNumber, Integer seatNumber) {
+        public Seat(int rowNumber, int seatNumber) {
             this.rowNumber = rowNumber;
             this.seatNumber = seatNumber;
         }
@@ -26,22 +22,39 @@ public class Ticket {
         }
     }
 
-    public Ticket(Film film, Integer theatre, Integer rowNumber, Integer seatNumber, Date date) {
-        this.number = totalNumberTickets++;
-        this.film = film;
-        this.theatre = theatre;
+    public Ticket( int program_number, int rowNumber, int seatNumber) {
+        this.ticket_id = ++totalNumberTickets;
+        this.program_id = program_number;
         this.seat = new Seat(rowNumber,seatNumber);
-        this.date = date;
+    }
+
+    public static void setTotalNumberTickets(int number) {
+        totalNumberTickets = number;
     }
 
     @Override
     public String toString() {
         return "Ticket{" +
-                "number=" + number +
-                ", film=" + film +
-                ", theatre=" + theatre +
+                "ticket_id=" + ticket_id +
+                ", program_id=" + program_id +
                 ", seat=" + seat +
-                ", date=" + date +
                 '}';
     }
+
+    public int getTicket_id() {
+        return ticket_id;
+    }
+
+    public int getProgram_id() {
+        return program_id;
+    }
+
+    public int getRow() {
+        return seat.rowNumber;
+    }
+
+    public int getSeat() {
+        return seat.seatNumber;
+    }
+
 }

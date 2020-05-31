@@ -1,34 +1,27 @@
 package com.bogdan.proiect;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.Date;
 import java.util.Objects;
-import java.util.Scanner;
 
 public class Program {
+    private static int totalNumberPrograms = 0;
+    private int program_id;
     private Date date;
     private int theatre;
+    private int film_id;
 
-    public Program(){
-        Scanner scanner = new Scanner(System.in);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        boolean ok;
-        do {
-            ok = false;
-            try {
-                System.out.println("Data (zz/LL/aaaa HH)");
-                String dateString = scanner.nextLine();
-                dateString = dateString+":00:00";
-                this.date = simpleDateFormat.parse(dateString);
-            } catch (ParseException e) {
-                System.out.println("Format incorect");
-                ok = true;
-            }
-        } while (ok);
-        System.out.println("Numarul salii:");
-        this.theatre = scanner.nextInt();
-        scanner.nextLine();
+    public Program(Date date, int theatre, int film_id) {
+        this.program_id = ++totalNumberPrograms;
+        this.date = date;
+        this.theatre = theatre;
+        this.film_id = film_id;
+    }
+
+    public Program(int program_id, Date date, int theatre, int film_id) {
+        this.program_id = program_id;
+        this.date = date;
+        this.theatre = theatre;
+        this.film_id = film_id;
     }
 
     @Override
@@ -38,6 +31,14 @@ public class Program {
         Program program = (Program) o;
         return theatre == program.theatre &&
                 Objects.equals(date, program.date);
+    }
+
+    public static void setTotalNumberPrograms(int number) {
+        totalNumberPrograms = number;
+    }
+
+    public static int getTotalNumberPrograms() {
+        return totalNumberPrograms;
     }
 
     @Override
@@ -64,5 +65,17 @@ public class Program {
 
     public void setTheatre(int theatre) {
         this.theatre = theatre;
+    }
+
+    public int getFilm_id() {
+        return film_id;
+    }
+
+    public void setFilm_id(int film_id) {
+        this.film_id = film_id;
+    }
+
+    public int getProgram_id() {
+        return program_id;
     }
 }
