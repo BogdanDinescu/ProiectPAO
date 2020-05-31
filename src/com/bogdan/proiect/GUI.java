@@ -258,6 +258,7 @@ class displayFilmsFrame extends JFrame {
             panel.add(table);
             panel.setViewportView(table);
             add(panel);
+            Audit.write("Display Films",Thread.currentThread().getName());
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SQLException e){
@@ -339,6 +340,7 @@ class addProgramFrame extends JFrame {
             Program program = new Program(sqlDate,theatre_number,film_number);
             try {
                 Database.getDatabase().saveProgram(program);
+                Audit.write("Added Program",Thread.currentThread().getName());
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(this,e.getMessage(),"Eroare",JOptionPane.ERROR_MESSAGE);
             }
@@ -405,6 +407,7 @@ class displayProgramFrame extends JFrame {
             panel.add(table);
             panel.setViewportView(table);
             add(panel);
+            Audit.write("Display Program",Thread.currentThread().getName());
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SQLException e){
@@ -451,6 +454,7 @@ class displayTicketsFrame extends JFrame {
             panel.add(table);
             panel.setViewportView(table);
             add(panel);
+            Audit.write("Display Tickets",Thread.currentThread().getName());
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SQLException e){
@@ -533,6 +537,7 @@ class sellTicketFrame extends JFrame {
                 Ticket t = new Ticket((int)programId.getValue(),(int)rowAndSeat[0],(int)rowAndSeat[1]);
 
                 Database.getDatabase().sellTicket(t);
+                Audit.write("Sold Ticket",Thread.currentThread().getName());
             } catch (SQLException | RuntimeException e) {
                 JOptionPane.showMessageDialog(this,e.getMessage(),"Eroare",JOptionPane.ERROR_MESSAGE);
             }
