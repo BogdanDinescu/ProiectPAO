@@ -133,4 +133,22 @@ public class Database {
         return null;
     }
 
+    public int deleteFilmbyId(int id) throws SQLException {
+        PreparedStatement stm = this.connection.prepareStatement("DELETE FROM FILMS WHERE FILM_ID = ?");
+        stm.setInt(1,id);
+        return stm.executeUpdate();
+    }
+
+    public int deleteProgrambyId(int id) throws SQLException {
+        PreparedStatement stm = this.connection.prepareStatement("DELETE FROM PROGRAM WHERE PROGRAM_ID = ?");
+        stm.setInt(1,id);
+        return stm.executeUpdate();
+    }
+
+    public int deleteTicketbyId(int id) throws SQLException {
+        PreparedStatement stm = this.connection.prepareStatement("DELETE FROM TICKETS WHERE TICKET_ID = ?");
+        stm.setInt(1,id);
+        return stm.executeUpdate();
+    }
+
 }

@@ -46,6 +46,9 @@ public class GUI {
         menu.setVisible(true);
     }
 
+    public void openDelete() {
+        deleteFrame f = new deleteFrame();
+    }
 }
 
 class menuFrame extends JFrame {
@@ -55,6 +58,7 @@ class menuFrame extends JFrame {
     JButton addProgram;
     JButton displayTickets;
     JButton sellTicket;
+    JButton delete;
     ArrayList<JButton> menuButtons;
 
     public menuFrame(GUI gui){
@@ -89,6 +93,10 @@ class menuFrame extends JFrame {
         sellTicket = new JButton("Sell Ticket");
         sellTicket.addActionListener(actionEvent -> gui.openSellTicket());
         menuButtons.add(sellTicket);
+
+        delete = new JButton("Delete something");
+        delete.addActionListener(actionEvent -> gui.openDelete());
+        menuButtons.add(delete);
 
         int y = 100;
         // adauga butoanele
@@ -287,37 +295,37 @@ class addProgramFrame extends JFrame {
         int cur_year = Calendar.getInstance().get(Calendar.YEAR);
         yearPiker = new JSpinner(new SpinnerNumberModel(cur_year,cur_year,cur_year+10,1));
         ((JSpinner.DefaultEditor) yearPiker.getEditor()).getTextField().setEditable(false);
-        yearPiker.setBounds(50,100,50,20);
+        yearPiker.setBounds(150,100,50,20);
         yearPiker.addChangeListener(this::changeDayPicker);
         add(yearPiker);
 
         int cur_month = Calendar.getInstance().get(Calendar.MONTH)+1;
         monthPicker = new JSpinner(new SpinnerNumberModel(cur_month,1,12,1));
         ((JSpinner.DefaultEditor) monthPicker.getEditor()).getTextField().setEditable(false);
-        monthPicker.setBounds(100,100,50,20);
+        monthPicker.setBounds(200,100,50,20);
         monthPicker.addChangeListener(this::changeDayPicker);
         add(monthPicker);
 
         dayPicker = new JSpinner();
         changeDayPicker(null);
-        dayPicker.setBounds(150,100,50,20);
+        dayPicker.setBounds(250,100,50,20);
         add(dayPicker);
 
         hourPicker = new JSpinner(new SpinnerNumberModel(0,0,24,1));
         ((JSpinner.DefaultEditor) hourPicker.getEditor()).getTextField().setEditable(false);
-        hourPicker.setBounds(200,100,50,20);
+        hourPicker.setBounds(300,100,50,20);
         add(hourPicker);
 
         labeltheatre = new JLabel("Theatre number");
-        labeltheatre.setBounds(60,120,100,20);
+        labeltheatre.setBounds(160,120,100,20);
         theatre = new JTextField();
-        theatre.setBounds(60,140,50,20);
+        theatre.setBounds(160,140,50,20);
         add(theatre); add(labeltheatre);
 
         labelfilm = new JLabel("Film id");
-        labelfilm.setBounds(180,120,100,20);
+        labelfilm.setBounds(280,120,100,20);
         film_id = new JTextField();
-        film_id.setBounds(180,140,50,20);
+        film_id.setBounds(280,140,50,20);
         add(film_id); add(labelfilm);
 
 
@@ -345,7 +353,7 @@ class addProgramFrame extends JFrame {
                 JOptionPane.showMessageDialog(this,e.getMessage(),"Eroare",JOptionPane.ERROR_MESSAGE);
             }
         });
-        submit.setBounds(160,240,80,30);
+        submit.setBounds(220,240,80,30);
         add(submit);
 
         setLayout(null);
@@ -396,6 +404,7 @@ class displayProgramFrame extends JFrame {
                 calendar.setTime(date);
                 String hour = String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
                 String minute = String.valueOf(calendar.get(Calendar.MINUTE));
+                if (minute.equals("0")) minute += "0";
                 data.get(row).add(nr_program + " " + hour + ':' + minute + ' ' + name);
             }
 
@@ -544,6 +553,67 @@ class sellTicketFrame extends JFrame {
         });
         panel.add(sellButton);
         add(panel);
+
+        setLayout(null);
+        setVisible(true);
+    }
+
+
+}
+
+class deleteFrame extends JFrame {
+    JLabel idLabel;
+    JTextField idField;
+    JRadioButton film;
+    JRadioButton program;
+    JRadioButton ticket;
+    ButtonGroup group;
+    JButton delete;
+
+    public deleteFrame() {
+        super("Delete something");
+        setSize(600, 400);
+
+        idLabel = new JLabel("Object id");
+        idLabel.setBounds(200,50,100,20);
+        add(idLabel);
+        idField = new JTextField();
+        idField.setBounds(200,80,50,20);
+        add(idField);
+
+        film = new JRadioButton("Film");
+        film.setBounds(200,120,100,20);
+        program = new JRadioButton("Program");
+        program.setBounds(200,140,100,20);
+        ticket = new JRadioButton("Ticket");
+        ticket.setBounds(200,160,100,20);
+
+        group = new ButtonGroup();
+        group.add(film); group.add(program); group.add(ticket);
+        add(film); add(program); add(ticket);
+
+        delete = new JButton("DELETE");
+        delete.setBounds(200,200,100,20);
+        delete.addActionListener(actionEvent -> {
+            try {
+                int id = Integer.parseInt(idField.getText());
+                try {
+                    int res = 0;
+                    if (film.isSelected()) res = Database.getDatabase().deleteFilmbyId(id);
+                    if (program.isSelected()) res = Database.getDatabase().deleteProgrambyId(id);
+                    if (ticket.isSelected()) res =  Database.getDatabase().deleteTicketbyId(id);
+                    if (res > 0) {
+                        JOptionPane.showMessageDialog(this,"Element deleted","Succes",JOptionPane.INFORMATION_MESSAGE);
+                        Audit.write("Delete item",Thread.currentThread().getName());
+                    }
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(this,e.getMessage(),"Eroare",JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this,"A number must be entered!","Eroare",JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        add(delete);
 
         setLayout(null);
         setVisible(true);
